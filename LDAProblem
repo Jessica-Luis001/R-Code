@@ -53,12 +53,18 @@ mean(pred$class!=States$region)            #error rate is 56.9%
 
 addmargins(table(yhat=pred$class,response=States$region))
 #most of the states in the south are identified correctly
+#none of the states in the midwest are identified correctly
 
 ##############################################################################################################
 
 #Find the estimated probability that the third state is from the Northeast. 
 #Which state is this?
 
+pred$posterior[3,]
+States$state[3]
+#estimated probability that Arizona is part of the Northeast is 4.1%
+
 ##############################################################################################################
 
 #If you wanted to improve the performance of this model, what could you do?
+#improve the model by adding additonal predictors
