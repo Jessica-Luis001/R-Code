@@ -1,0 +1,64 @@
+library(matlib)
+library(smallstuff)
+library(ISLR)
+library(MASS)
+library(ROCR)
+library(sur)
+library(class)
+
+#Unlike logistic regression, we can use linear discriminant analysis in situations where 
+#we have more than 2 classes. We inspect the States data set from the sur package, let 
+#the response be the variable region, while we use only one predictor; the variable teachpay.
+#Get some information for the States data set first. Note that there maybe another package 
+#with a dataset that has the same name; make sure to select the one from the sur package. 
+#Use data(States, package=“sur”).
+
+data(States, package="sur")
+?States
+head(States)
+dim(States)
+head(States$region)
+
+##############################################################################################################
+
+#Create an lda object for region versus teachpay. What percentage of the states are in the 
+#midwest? What is the mean annual salary for public school teachers in the south?
+
+(ldamod2=lda(region~teachpay,States))
+#23.5% of states are in the midwest
+#mean annual salary for public school teachers in the south is -.
+
+##############################################################################################################
+
+#Plot the model. Does it look like the groups are well separated (in terms of values)?
+#not well separated - each group is too spread out, but there is some difference
+#each class isn't clumped around a certain area 
+
+plot(ldamod2)
+
+##############################################################################################################
+
+#Find the error rate. Does the model do a good job identifying the region based on 
+#teachers annual salary?
+#class is predicted value --> need to compare to the actual value - response in data set
+
+pred=predict(ldamod2)
+mean(pred$class!=States$region)            #error rate is 56.9%
+#Not that great; it fails to correctly identify more than half -
+
+##############################################################################################################
+
+#Create a contingency table with totals for the fitted values versus the responses. 
+#How well does the method identify states in the south? How about states in the midwest?
+
+addmargins(table(yhat=pred$class,response=States$region))
+#most of the states in the south are identified correctly
+
+##############################################################################################################
+
+#Find the estimated probability that the third state is from the Northeast. 
+#Which state is this?
+
+##############################################################################################################
+
+#If you wanted to improve the performance of this model, what could you do?
