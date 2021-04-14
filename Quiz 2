@@ -1,0 +1,87 @@
+# We have a population with a predictor x (scalar) and response Y, and the model Y=fx+ε where fx=-3+2x and var=9. 
+# We obtain 5 training sets from the population, each selecting 3 observations for each of the predictors 1, 2, and 3. 
+# We use 2 different statistical learning methods: method 1 is a linear model, method 2 uses a mean by predictor method. 
+# We obtain the following estimates for fx:
+
+# 9 predictors and 9 responses
+# Method 1 (linear model) = Predictors / Method 2 = Responses
+#	Training Set 1: f^1(x) = -6.3 + 3.3x		/ f^1(1) = -2.7, f^1(2) = 0, f^1(3) = 3.9
+#estimate for the relationship inside the population method / mean by predictor method
+#	Training Set 2: f^2(x) = 0.5			/ f^2(1) = -0.6, f^2(2) = 2.7, f^2(3) = -0.5
+#	Training Set 3: f^3(x) = -1.6 + 2.1x		/ f^3(1) = 0.9, f^3(2) = 1.8 , f^3(3) = 5.2
+#	Training Set 4: f^4(x) = -2.4 + 1.6x		/ f^4(1) = -0.9, f^4(2) = 0.8, f^4(3) = 2.2
+#	Training Set 5: f^5(x) = -4.9 + 2.7x		/ f^5(1) =-1.1, f^5(2) = -1.7, f^5(3) = 4.4
+
+# We are going to assume that we have obtained all possible training sets, so these are all possible estimates for f (note that this is clearly not true). 
+library(matlib)
+library(smallstuff)
+#parsave - par(no.randomly - TRUE)
+#par(parsave)
+
+# The predictor vector for all training sets is x=1, 1, 1, 2, 2, 2, 3, 3, 3, and for training set 2 the responses are 
+# y=-2.1, 2.8, -2.4, 1.2, 0.2, 6.5, 0.5, 2.8, -4.9. Calculate the training MSE for training set 2 for each method. Which is the more flexible method?
+    #calculate residuals first:  actual value (y) - fitted value (x)
+    #training MSE for training set 2: need to have 9 fitted values
+	  #0.5 (fitted value for observation) nine times
+    #y’s (each) - 0.5 = answer (residuals) ; (^2)square the answers = mean 
+(x-c(rep(1,3), rep(2,3), rep(3,3)))
+(y-c(-2.1,2.8,-2.4,1.2,0.2,6.5,0.5,2.8,-4.9))
+
+    #Method 1
+(yhat-rep(0.5,9))
+(MSE1-mean((y-yhat)^2)                      	#10.17
+    #Method 2
+(yhat-c(rep(-0.6,3),rep(2.7,3),rep(-0.5,3)))
+(MSE2-mean((y-yhat)^2)	                      #7.9
+
+     #Method 2 is more flexible (fitted values are closer to the actual value as it has a lower training MSE)
+      #picture
+(x=c(rep(1,3), rep(2,3), rep(3,3)))
+(y=c(-2.1,2.8,-2.4,1.2,0.2,6.5,0.5,2.8,-4.9))
+plot(y~x)
+abline(lm(y~x),col=3)				#straight horizontal line - smallest RSS- linear regression
+ 		#Mean for each predictor:(takes 3 points for predictors and calculates each response)
+points(1:3. c(-0.6,2.7,-0.5),col=2,pch=20,cex=1.5)
+    #actual line
+abline(-3.2,col=4)
+
+# Find the following for method 1: Ef1, biasf1, varf1, and the expected true MSE for x=1.
+(x=1);(f=-3.2)		true value of f(x)
+	#Method 1
+fhat= -6.3 + 3.3*x
+fhat[2]= 0.5
+fhat[3]= -1.6 + 2.1*x	
+fhat[4]= -2.4 + 1.6*x
+fhat[5]= -4.9 + 2.7*x	
+(Ef=mean(fhat))		#-1
+(bias=Ef-f)			#0	
+(v=var(fhat))			#2.5
+(MSE=v+bias^2+9)		#11.5
+
+#Calculate the expected true MSE for method 2. Note that you need to calculate it for each of the following predictors first: 1, 2, and 3. 
+#Method 1 (not asked)
+MSE=NULL
+for (i in 1:3){
+	fhat= -6.3 + 3.3*i
+fhat[2]= 0.5
+fhat[3]= -1.6 + 2.1*i	
+fhat[4]= -2.4 + 1.6*i
+fhat[5]= -4.9 + 2.7*i	
+MSE[i]=var(fhat)+(mean(fhat)-(-3+2*i))^2+9
+}
+
+mean(MSE)			#11.0
+	#Method 2
+MSE=NULL
+fhat=c(-2.7,-0.6,0.9,-0.9,-1.1)
+MSE[1]=var(fhat)+(mean(fhat)-(-3+2*i))^2+9
+fhat=c(0,2.7,1.8,0.8,-1.7)
+MSE[2]=var(fhat)+(mean(fhat)-(-3+2*i))^2+9
+fhat=c(3.9,-0.5,5.2,2.2,4.4)
+MSE[3]=var(fhat)+(mean(fhat)-(-3+2*i))^2+9
+mean(MSE)			#12.2
+   #For method 1 the expected true MSE is 11.0 (you do not need to calculate this).
+   
+# Which of the two methods is better? Why do you think that is? Does one of the methods overfit the data?
+    #Method 1 is better since it has a lower true MSE, and that is because it is most like the actual relationship in the population. 
+    #Method 2 overfits the data; it is too flexible for this situation.
