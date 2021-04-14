@@ -1,0 +1,65 @@
+# We will be working with the cheddar data set in the faraway package, with the variable taste as its response variable. 
+# Make sure to get information on this data set before answering the following questions:
+
+library(matlib)
+library(smallstuff)
+library(faraway)
+#parsave - par(no.randomly - TRUE)
+#par(parsave)
+
+data(cheddar)
+?cheddar
+head(cheddar)
+dim(cheddar)
+
+# First create n and let it be the number of observations in the data set. 
+# Then, with taste as the response, create a linear model object that has H2S, Acetic, and Lactic as predictors. 
+# What is the (estimated) model (i.e., provide the formula - the response= #)? Round to 2 decimals.
+
+(n=nrow(cheddar))
+lmod<-lm(taste~H2S+Acetic+Lactic, cheddar)
+round2(coef(lmod),2)
+#Estimated model: taste=-28.88Intercept + 3.91H2S + 0.33Acetic + 19.67Lactic + eps (error deucible error)
+
+# Look at the summary and check if the predictors are significant. Would you recommend removing one? If so, which one?
+summary(lmod)
+#Remove Acetic since there is not enough evidence to state that its parameter is not equal zero
+
+# Create a nice plot of taste versus H2S, with descriptive labels and a title.
+plot(taste~H2S,cheddar, xlab=”Hydrogen Sulfice Concentration (log scale)”, ylab=”subjective taste score”, main=”cheddar cheese”)
+
+# Create a second linear model with only taste versus H2S and draw the regression line in your plot in a color.
+lmod2=lm(taste~H2S, cheddar)
+abline(lmod2,col=2)
+
+# Compare the two models using a hypothesis test. At α=.05, which model would you pick?
+anova(lmod2,lmod)
+#Since the p-value is 0.067, there is not enough evidence to reject H0, so we assume that model 2 (with just H2S) is the better one.
+
+#Find the MSE for both models. Which model is more flexible?
+(RSS=deviance(lmod))	#2668
+(MSE=RSS/n)			#89
+(RSS2=deviance(lmod2))	#3286
+(MSE2=RSS2/n)		#109
+#The first model is more flexible since it has a longer training MSE
+
+# Create a qqplot on the second model. Does it look like the irreducible errors are normally distributed?
+qqnorm(resid(lmod2)
+qqline(resid(lmod2)
+#Yes, the residuals look normal, indicating that the irreducible errors are likely normally distributed. The points are very close to the line - pretty much normal
+
+# Create a residual plot on the second model. Do you see any issues?
+plot(resid(lmod2)~fitted(lmod2))
+abline(h=0,col=2)
+#no pattern, so this is fine - pretty random
+
+# Find out if there is any collinearity in the first model.
+vif(lmod)
+#no collinearity - all are below 5 → 1.99H2S / 1.83Acetic / 1.94Lactic
+
+# Extra Credit: Recreate the plot from c) and d), then find the index of the greatest outlier, and mark that observation in your plot. 
+# Note that the greatest outlier can be positive OR negative.
+plot(taste~H2S,cheddar, xlab=”Hydrogen Sulfice Concentration”, ylab=”subjective taste score”, main=”cheddar cheese”)
+abline(lmod2,col=2)
+(id=which.max(abs(rstudent(lmod2))))
+points(taste[id]~H2S[id], cheddar, pch=’x’,cex=1.5,col=3)
