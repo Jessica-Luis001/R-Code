@@ -1,0 +1,36 @@
+#You are working for a company that produces staples, and they are interested in the number of staple strips they can produce each day. 
+#Each day starts with a supply of zinc, a supply of glue, and a number of people to operate the machines, and at the end of the day a number of staple strips are produced. You do not need R for this question; please enter the answers in your R-script as comments.
+
+#Explain the machine learning problem; what type of problem is it? Supervised or unsupervised, regression or classification?
+      #Supervised regression problem
+#Is there a response, and if so, what is it? What are the predictors?
+      #The response is the number of staple strips produced in a day, the predictors are the #amount of zinc, the supply amount of glue, and the number of people.
+
+#What is the formula for the machine learning problem you will try to obtain?
+      #y = f ( x ) + eps, or stripes = f ( zinc, glue, people) + eps
+
+#What part of the formula will you try to estimate?
+      #we will try to estimate f, the response is where you calculate the fitted values
+      
+#Let a∙1=0 1 -1 , a∙2=3 1 1 , and y=6 3 1 . **column because period**
+(a.1 = c(0,1,-1))
+(a.2 = c(3,1,1))
+y = c(6,3,1)
+
+#Find the matrix A. Make sure to display it!
+
+(A=cbind(a.1,a.2))	cbind because its a column vector
+
+# Are the columns of A orthogonal?
+crossprod(a.1,a.2)	vector product between two vectors
+#Yes, orthogonal 	when the response is 0
+#Alternative: t(a.1)%*%a.2
+
+#Can you find a solution for x in the equation Ax=y? If you found an answer, multiply A by x to show you get y.
+(x=systemEq(A,y))
+
+#x=(1,2)
+A%*%x 	to show that you get y		6, 3, 1
+
+Find a22.
+A[2,2]			1
