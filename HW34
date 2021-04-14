@@ -1,0 +1,84 @@
+library(matlib)
+library(smallstuff)
+library(ISLR)
+library(MASS)
+library(broom)
+library(ROCR)
+library(sur)
+library(class)
+library(faraway)
+source('smallstuff2.R')
+
+# 1. Load the Auto data set from your data directory, and once again let the 
+#    variable mpg be the response variable. Get some information about the dataset. 
+#    We wish to perform a linear regression of mpg versus some polynomial of horsepower,
+#    and we want to find out which polynomial would be best. Do the following.
+load("data/Auto.RData")
+#data(Auto)
+?Auto
+head(Auto)
+dim(Auto)
+
+# a) Use the function sample to split the data equally into a training set and 
+#    a testing set. Call the training set AutoTrain and the testing set AutoTest. 
+#    Except for the last part of the problem, we will be working with AutoTrain.
+set.seed(120)
+smp_size=(0.50 * nrow(Auto))
+new_smple=sort(sample((nrow(Auto)), size=smp_size))
+AutoTrain=Auto[new_smple, ]
+AutoTest=Auto[-new_smple, ]
+
+# b) Plot mpg versus horsepower. 
+plot(mpg~horsepower, Auto, xlab='Horsepower', ylab='mpg', main='Auto Data Set')
+
+# c) Split the data again equally using sample (make sure to set a seed) and 
+#    store the indices for the training part of the data in the variable train. 
+#    We will refer to observations for the indices in train as the training set 
+#    of AutoTrain. 
+n=nrow(A)
+smp_size2=round((0.25 * nrow(Auto))) 
+set.seed(120) #ensures that you get the same results ~ output is reproducible
+train=sort(sample(n, smp_size2)) #observations for indices as training set of AutoTrain
+
+# d) Using train, find the validation MSE for polynomials from 1 to 6. 
+#    Plot them. Which one seems best?
+#lmod<-lm(mpg~horsepower, Auto)
+#round(coef(lmod),2)
+#lmod=list()
+mx=6
+MSEval=NULL
+for(i in 1:mx) {
+  lmod=lm(mpg~poly(horsepower,i), AutoTrain, subset=train)
+  MSEval[i]=mean((AutoTrain$mpg[-train]-predict(lmod, AutoTrain[-train,]))^2)
+}
+
+plot(MSEval, type="b")
+which.min(MSEval) #third in the vecotr is the smallest one ~ cubic poly gets the smallest validation
+MSEval
+#Quadratic 
+
+# e) Create models for the two best fits on the training data. 
+#    Call them lmod2 and lmod3. Obtain predictions for the full dataset 
+#    (all of AutoTrain) using these models, call them respectively pred2 and pred3.
+lmod2=lm(mpg~poly(horsepower,2),AutoTrain[train,])
+lmod3=lm(mpg~poly(horsepower,3),AutoTrain[train,])
+
+pred2=predict(lmod2,AutoTrain)
+pred3=predict(lmod3,AutoTrain)
+
+# f) Plot mpg versus horsepower again. Plot the fit from lmod2 and lmod3 
+#    using the predictions from lmod2 and lmod3 versus horsepower, but make sure 
+#    to order them by horsepower first, and plot lines rather than points. 
+#    Use different colors for each fit. Do the fits look very different?
+plot(mpg~horsepower, AutoTrain)
+o=order(AutoTrain$horsepower)
+lines(pred2[o]~horsepower[o], AutoTrain, col=2)
+lines(pred3[o]~horsepower[o], AutoTrain, col=3)
+#fits are almost identical
+
+# g) Use AutoTest to obtain the testing MSE for both lmod2 and lmod3, 
+#    then choose your preferred model.
+
+mean((AutoTest$mpg-predict(lmod2, AutoTest))^2)
+mean((AutoTest$mpg-predict(lmod3, AutoTest))^2)
+#quadratic model does best - small
