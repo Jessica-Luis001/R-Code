@@ -1,0 +1,78 @@
+# We will be working with the NELS data set in the sur package, and we are going to try to predict whether a student has attended nursery 
+# school from their reading achievement in 12th grade and their socioeconomic status. Get some information on the dataset, then do the following:
+
+library(matlib)
+library(smallstuff)
+library(ISLR)
+library(MASS)
+library(ROCR)
+library(sur)
+library(class)
+source(“smallstuff2.R”)
+
+data(NELS)
+?NELS
+head(NELS)
+dim(NELS)
+names(NELS)
+
+# Create a new dataset called NELS2, which must contain only the three variables of interest, and only those rows that 
+# do not have missing values. Use the function complete.cases to achieve this. Show the first few rows of NELS2 to see if you 
+# did it right, then set n equal to the number of rows in NELS2.
+NELS2=NELS[complete.cases(NELS[,c(28,41,48)]),c(28,41,48)]
+head(NELS2)
+(n=nrow(NELS2))
+
+# Create a vector that consists of the numbers 1 to 300 and call it train. This will represent the indices for the observations 
+# in the training set; the remaining observations will be the testing set. Create a logistic regression model on all variables in 
+# the training set (note that the response is whether the student attended nursery school) and call it gmod.
+train=(1:300)
+gmod=glm(nursery~.,binomial,NELS2,subset=train)
+→ binomial = logistic regression - family= binomial		(fitting generalized linear models)
+
+# Are all predictors significant? If you had to remove one, which one would it be? Why?
+summary(gmod)
+	#Remove achrdg12 since it is not significant; p-value = 0.4 > 0.5		[look at the “pr(>|z|)”]
+
+# Find the error rate, sensitivity, and specificity of the testing data set under the logistic regression model.
+(er=errorRate(gmod,NELS2[-train,]))		
+er$errorRate					#error rate: 28.33%
+er$m[2,2] / (er$m[1,2] + er$m[2,2])		#sensitivity: 91.4%
+er$m[1,1] / (er$m[1,1] + er$m[2,1])		#specificity: 30.8%
+    # never run model on testing set - make a model on data set - data set = training data
+
+# Explain what the values in d) mean in the context of this problem.
+head(NELS2$nursery)
+#28.33% of observations were misclassified
+#91.4% of students that attended nursery school were correctly identified as such
+
+# Create an LDA model on the training set for the same response and predictors. You may call it ldamod.
+((ldamod=lda(nursery~.,NELS2[-train,])
+
+# Find the error rate, sensitivity, and specificity of the testing data set under the LDA model.
+(pred=predict(ldamod, NELS2[-train,])	
+mean(pred$class!=NELS2$nursery[-train])	#28.33%
+(ct=addmargins(table(yhat=pred$class,response=NELS2$nursery[-train])))
+ct[2,2] / ct[3,2] 	#sensitivity is 91.4%
+ct[1,1] / ct[3,1]	#specificity is 30.8% 
+
+# How do the two methods compare?
+    #the same
+
+# For observation 1 in the testing set, find the probability that this student went to nursery school using both the LDA model and the logistic regression model.
+#logistic regression
+predict(gmod,NELS2[-train,],type=”r”) [1]	#76.4%
+#LDA
+pred$posterior[1,2]				#76.9%
+
+# Create an ROC plot for the testing set for each method and put them on the same page. Does this confirm your conclusion in h)?
+(par(mfrow=c(2,1))
+ROC(ldamod,NELS2[-train,])
+ROC(gmod,NELS2[-train,])
+par(parSave)
+#yes it confirms that the two models are equally effective in recognizing students that attend 
+nursery school.
+
+# Which of the two methods, logistic regression or LDA, would you use if you wanted to predict the urbanity of a student (also in the NELS dataset) instead?
+head(NELS$urban)
+#LDA because there are more than 2 classes.
